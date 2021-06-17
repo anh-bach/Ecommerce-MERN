@@ -1,0 +1,9 @@
+/* Make user admin by manually updating mongodb in digital ocean
+
+* show dbs
+* use dcsgapi
+* show collections
+* db.users.find().pretty();
+* db.users.update({_id: ObjectId("5d417beb2ce58e4656d2edfd")}, {$set: {role: 1}});
+* db.users.find().pretty();
+*/
