@@ -3,11 +3,19 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Button } from 'antd';
-import { MailOutlined, GoogleOutlined } from '@ant-design/icons';
+import {
+  MailOutlined,
+  GoogleOutlined,
+  FacebookOutlined,
+} from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { auth, googleAuthProvider } from './../../firebase';
+import {
+  auth,
+  googleAuthProvider,
+  facebookAuthProvider,
+} from './../../firebase';
 import { LOGGED_IN_USER } from '../../actions/types';
 
 const Login = () => {
@@ -18,11 +26,11 @@ const Login = () => {
   const history = useHistory();
 
   const user = useSelector((state) => state.user);
-
+  //check logged in user
   useEffect(() => {
     if (user && user.token) history.push('/');
   }, [user]);
-
+  //submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     //loading
@@ -48,7 +56,7 @@ const Login = () => {
       setLoading(false);
     }
   };
-
+  //Google login
   const googleLogin = async () => {
     //
     try {
@@ -64,6 +72,62 @@ const Login = () => {
       });
       history.push('/');
     } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+      //loading
+      setLoading(false);
+    }
+  };
+
+  //facebook login
+  const facebookLogin = async () => {
+    try {
+      const result = await auth.signInWithPopup(facebookAuthProvider);
+      const { user } = result;
+      const idTokenResult = await user.getIdTokenResult();
+      dispatch({
+        type: LOGGED_IN_USER,
+        payload: {
+          email: user.email,
+          token: idTokenResult.token,
+        },
+      });
+      history.push('/');
+    } catch (error) {
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        //handle existing email error
+        var pendingCred = error.credential;
+        var email = error.email;
+        const methods = await auth.fetchSignInMethodsForEmail(email);
+
+        if (methods[0] === 'password') {
+          try {
+            const password = prompt('Enter your password');
+            const result = await auth.signInWithEmailAndPassword(
+              email,
+              password
+            );
+            await result.user.linkWithCredential(pendingCred);
+            const { user } = result;
+            const idTokenResult = await user.getIdTokenResult();
+            dispatch({
+              type: LOGGED_IN_USER,
+              payload: {
+                email: user.email,
+                token: idTokenResult.token,
+              },
+            });
+            history.push('/');
+            return;
+          } catch (error) {
+            console.log(error);
+            toast.error(error.message);
+            //loading
+            setLoading(false);
+          }
+        }
+      }
+
       console.log(error);
       toast.error(error.message);
       //loading
@@ -127,6 +191,17 @@ const Login = () => {
             size='large'
           >
             Login with Google
+          </Button>
+          <Button
+            onClick={facebookLogin}
+            type='primary'
+            className='mb-3'
+            block
+            shape='round'
+            icon={<FacebookOutlined />}
+            size='large'
+          >
+            Login with Facebook
           </Button>
           <Link to='/forgot/password' className='float-right text-danger'>
             Forgot Password
