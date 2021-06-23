@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { Button } from 'antd';
+import Button from 'antd/lib/button';
 import {
   MailOutlined,
   GoogleOutlined,
@@ -17,6 +17,7 @@ import {
   facebookAuthProvider,
 } from './../../firebase';
 import { LOGGED_IN_USER } from '../../actions/types';
+import { createOrUpdateUser } from '../../functions/auth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,13 +25,21 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const history = useHistory();
+  //redirect base on user role
+  const roleBasedRedirect = (res) => {
+    if (res.data.role === 'admin') {
+      history.push('/admin/dashboard');
+    } else {
+      history.push('/user/history');
+    }
+  };
 
   const user = useSelector((state) => state.user);
   //check logged in user
   useEffect(() => {
     if (user && user.token) history.push('/');
-  }, [user]);
-  //submit form
+  }, [user, history]);
+  //1))submit form login
   const handleSubmit = async (e) => {
     e.preventDefault();
     //loading
@@ -40,14 +49,21 @@ const Login = () => {
       const { user } = result;
       const idTokenResult = await user.getIdTokenResult();
 
+      //sending token to backend and save user data in database
+      const res = await createOrUpdateUser(idTokenResult.token);
+      //update global store
       dispatch({
         type: LOGGED_IN_USER,
         payload: {
-          email: user.email,
+          name: res.data.name,
+          email: res.data.email,
           token: idTokenResult.token,
+          role: res.data.role,
+          _id: res.data._id,
         },
       });
-      history.push('/');
+      //redirect base on user roles
+      roleBasedRedirect(res);
     } catch (error) {
       //
       console.log(error);
@@ -63,14 +79,20 @@ const Login = () => {
       const result = await auth.signInWithPopup(googleAuthProvider);
       const { user } = result;
       const idTokenResult = await user.getIdTokenResult();
+      //sending token to backend and save user data in database
+      const res = await createOrUpdateUser(idTokenResult.token);
+      //update global store
       dispatch({
         type: LOGGED_IN_USER,
         payload: {
-          email: user.email,
+          name: res.data.name,
+          email: res.data.email,
           token: idTokenResult.token,
+          role: res.data.role,
+          _id: res.data._id,
         },
       });
-      history.push('/');
+      roleBasedRedirect(res);
     } catch (error) {
       console.log(error);
       toast.error(error.message);
@@ -85,11 +107,17 @@ const Login = () => {
       const result = await auth.signInWithPopup(facebookAuthProvider);
       const { user } = result;
       const idTokenResult = await user.getIdTokenResult();
+      //sending token to backend and save user data in database
+      const res = await createOrUpdateUser(idTokenResult.token);
+      //update global store
       dispatch({
         type: LOGGED_IN_USER,
         payload: {
-          email: user.email,
+          name: res.data.name,
+          email: res.data.email,
           token: idTokenResult.token,
+          role: res.data.role,
+          _id: res.data._id,
         },
       });
       history.push('/');
@@ -110,14 +138,20 @@ const Login = () => {
             await result.user.linkWithCredential(pendingCred);
             const { user } = result;
             const idTokenResult = await user.getIdTokenResult();
+            //sending token to backend and save user data in database
+            const res = await createOrUpdateUser(idTokenResult.token);
+            //update global store
             dispatch({
               type: LOGGED_IN_USER,
               payload: {
-                email: user.email,
+                name: res.data.name,
+                email: res.data.email,
                 token: idTokenResult.token,
+                role: res.data.role,
+                _id: res.data._id,
               },
             });
-            history.push('/');
+            roleBasedRedirect(res);
             return;
           } catch (error) {
             console.log(error);

@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
-
 import { toast } from 'react-toastify';
-import { Button } from 'antd';
-import { MailOutlined, GoogleOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import { auth } from './../../firebase';
-import { LOGGED_IN_USER } from '../../actions/types';
 
 const ForgotPassword = ({ history }) => {
   const [email, setEmail] = useState('');
@@ -16,7 +11,7 @@ const ForgotPassword = ({ history }) => {
 
   useEffect(() => {
     if (user && user.token) history.push('/');
-  }, [user]);
+  }, [user, history]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

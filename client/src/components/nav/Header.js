@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu } from 'antd';
+import Menu from 'antd/lib/menu';
 import {
   AppstoreOutlined,
   SettingOutlined,

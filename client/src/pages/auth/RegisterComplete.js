@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from './../../firebase';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+
+import { LOGGED_IN_USER } from '../../actions/types';
+import { createOrUpdateUser } from '../../functions/auth';
 
 const RegisterComplete = ({ history }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
 
   useEffect(() => {
+    //get user email from LS and wait for user to complete registration
     setEmail(window.localStorage.getItem('emailForRegistration'));
   }, []);
 
@@ -25,7 +31,7 @@ const RegisterComplete = ({ history }) => {
     try {
       const result = await auth.signInWithEmailLink(
         email,
-        window.location.href
+        window.location.href //data in url from firebase
       );
       //update user password
       if (result.user.emailVerified) {
@@ -35,14 +41,25 @@ const RegisterComplete = ({ history }) => {
         let user = auth.currentUser;
         await user.updatePassword(password);
         const idTokenResult = await user.getIdTokenResult();
-        //save user in redux store
-
+        //send request to server + create user in database + save user in redux store
+        const res = await createOrUpdateUser(idTokenResult.token);
+        dispatch({
+          type: LOGGED_IN_USER,
+          payload: {
+            name: res.data.name,
+            email: res.data.email,
+            token: idTokenResult.token,
+            role: res.data.role,
+            _id: res.data._id,
+          },
+        });
         //redirect
         history.push('/');
       }
     } catch (error) {
       //handle error
       toast.error(error.message);
+      console.log(error);
     }
   };
 
