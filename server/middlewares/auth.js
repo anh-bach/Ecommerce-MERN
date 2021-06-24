@@ -1,23 +1,24 @@
 const admin = require('../firebase');
 const User = require('../models/user');
+const catchAsync = require('../utils/catchAsync');
 
 //verify token from firebase
-exports.authCheck = async (req, res, next) => {
-  try {
+exports.authCheck = catchAsync(
+  async (req, res, next) => {
     const firebaseUser = await admin
       .auth()
       .verifyIdToken(req.headers.authtoken);
     req.user = firebaseUser;
     next();
-  } catch (error) {
-    console.log(error);
-    res.status(401).json({ err: 'Invalid or expired token' });
-  }
-};
+  },
+  'Error from authCheck',
+  401,
+  'Invalid or expired token'
+);
 
 //check admin role
-exports.adminCheck = async (req, res, next) => {
-  try {
+exports.adminCheck = catchAsync(
+  async (req, res, next) => {
     const { email } = req.user;
 
     const adminUser = await User.findOne({ email });
@@ -26,8 +27,8 @@ exports.adminCheck = async (req, res, next) => {
     } else {
       next();
     }
-  } catch (error) {
-    console.log(error);
-    res.status(401).json({ err: 'Server error' });
-  }
-};
+  },
+  'Error from admin Check',
+  401,
+  'Server error'
+);
