@@ -4,19 +4,18 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
-import {
-  createCategory,
-  getCategories,
-  removeCategory,
-} from '../../../functions/category';
+import { getCategories } from '../../../functions/category';
+import { getSubs, createSub, removeSub } from '../../../functions/sub';
 import AdminNav from '../../../components/nav/AdminNav';
 import CategoryForm from '../../../components/forms/CategoryForm';
 import LocalSearch from '../../../components/forms/LocalSearch';
 
-const CategoryCreate = () => {
+const SubCreate = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [category, setCategory] = useState('');
+  const [subs, setSubs] = useState([]);
   //searching-filtering 1))
   const [keyword, setKeyword] = useState('');
 
@@ -24,6 +23,7 @@ const CategoryCreate = () => {
 
   useEffect(() => {
     loadCategories();
+    loadSubs();
   }, []);
 
   const loadCategories = async () => {
@@ -35,18 +35,27 @@ const CategoryCreate = () => {
     }
   };
 
+  const loadSubs = async () => {
+    try {
+      const res = await getSubs();
+      setSubs(res.data);
+    } catch (error) {
+      console.log('from load sub categories', error.response);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await createCategory(name, user.token);
+      const res = await createSub(name, category, user.token);
       setLoading(false);
       setName('');
       toast.success(`${res.data.name} is created.`);
-      loadCategories();
+      loadSubs();
     } catch (error) {
-      console.log('from create category', error.response);
+      console.log('from create sub category', error.response);
       setLoading(false);
       toast.error(error.response.data.err);
     }
@@ -56,21 +65,21 @@ const CategoryCreate = () => {
     if (window.confirm('Delete?')) {
       setLoading(true);
       try {
-        const res = await removeCategory(slug, user.token);
+        const res = await removeSub(slug, user.token);
         setLoading(false);
         toast.success(`${res.data.name} is deleted.`);
-        loadCategories();
+        loadSubs();
       } catch (error) {
         setLoading(false);
-        console.log('From delete category', error.response);
+        console.log('From delete sub category', error.response);
         toast.error(error.response.data.err);
       }
     }
   };
 
   //search-filter
-  const search = (keyword) => (category) =>
-    category.name.toLowerCase().includes(keyword.toLowerCase());
+  const search = (keyword) => (subcategory) =>
+    subcategory.name.toLowerCase().includes(keyword.toLowerCase());
 
   return (
     <div className='container-fluid'>
@@ -82,27 +91,43 @@ const CategoryCreate = () => {
           {loading ? (
             <h4 className='text-danger'>Loading...</h4>
           ) : (
-            <h4>Create Category</h4>
+            <h4>Create Sub Category</h4>
           )}
+          <div className='form-group'>
+            <label>Parent Category</label>
+            <select
+              className='form-control'
+              name='category'
+              onChange={(e) => setCategory(e.target.value)}
+              value={category}
+              required
+            >
+              <option value=''>Please select category</option>
+              {categories.length > 0 &&
+                categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
+            </select>
+          </div>
           <CategoryForm
             handleSubmit={handleSubmit}
             name={name}
             setName={setName}
           />
-
           <LocalSearch keyword={keyword} setKeyword={setKeyword} />
-
-          {categories.length &&
-            categories.filter(search(keyword)).map((category) => (
-              <div key={category._id} className='alert alert-secondary'>
-                {category.name}{' '}
+          {subs.length &&
+            subs.filter(search(keyword)).map((sub) => (
+              <div key={sub._id} className='alert alert-secondary'>
+                {sub.name}{' '}
                 <span
                   className='btn btn-sm float-right'
-                  onClick={() => handleRemove(category.slug)}
+                  onClick={() => handleRemove(sub.slug)}
                 >
                   <DeleteOutlined className='text-danger' />
                 </span>{' '}
-                <Link to={`/admin/category/${category.slug}`}>
+                <Link to={`/admin/sub/${sub.slug}`}>
                   <span className='btn btn-sm float-right'>
                     <EditOutlined className='text-warning' />
                   </span>
@@ -115,4 +140,4 @@ const CategoryCreate = () => {
   );
 };
 
-export default CategoryCreate;
+export default SubCreate;

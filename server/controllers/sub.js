@@ -4,8 +4,8 @@ const catchAsync = require('../utils/catchAsync');
 
 exports.create = catchAsync(
   async (req, res) => {
-    const { name } = req.body;
-    const sub = await new Sub({ name, slug: slugify(name) }).save();
+    const { name, parent } = req.body;
+    const sub = await new Sub({ name, slug: slugify(name), parent }).save();
     res.json(sub);
   },
   'from create subcategory',
@@ -46,10 +46,10 @@ exports.remove = catchAsync(
 );
 exports.update = catchAsync(
   async (req, res) => {
-    const { name } = req.body;
+    const { name, parent } = req.body;
     const updated = await Sub.findOneAndUpdate(
       { slug: req.params.slug },
-      { name, slug: slugify(name) },
+      { name, parent, slug: slugify(name) },
       { new: true }
     );
     if (!updated) throw Error('No such category found');
