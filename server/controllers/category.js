@@ -4,7 +4,6 @@ const catchAsync = require('../utils/catchAsync');
 
 exports.create = catchAsync(
   async (req, res) => {
-    console.log(req.body);
     const { name } = req.body;
     const category = await new Category({ name, slug: slugify(name) }).save();
     res.json(category);
@@ -13,17 +12,6 @@ exports.create = catchAsync(
   400,
   'Create category failed'
 );
-
-// exports.create = async (req, res) => {
-//   try {
-//     const { name } = req.body;
-//     const category = await new Category({ name, slug: slugify(name) }).save();
-//     res.json(category);
-//   } catch (error) {
-//     console.log('from create category', error);
-//     res.status(400).json({ err: 'create category failed' });
-//   }
-// };
 
 exports.read = catchAsync(
   async (req, res) => {

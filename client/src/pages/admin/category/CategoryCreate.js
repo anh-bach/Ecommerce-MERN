@@ -1,19 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+
 import {
   createCategory,
   getCategories,
   removeCategory,
 } from '../../../functions/category';
-
 import AdminNav from '../../../components/nav/AdminNav';
+import CategoryForm from '../../../components/forms/CategoryForm';
+import LocalSearch from '../../../components/forms/LocalSearch';
 
 const CategoryCreate = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  //searching-filtering 1))
+  const [keyword, setKeyword] = useState('');
 
   const user = useSelector((state) => state.user);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const res = await getCategories();
+      setCategories(res.data);
+    } catch (error) {
+      console.log('from load categories', error.response);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,35 +41,36 @@ const CategoryCreate = () => {
 
     try {
       const res = await createCategory(name, user.token);
-      console.log(res);
-
       setLoading(false);
       setName('');
-      console.log('passing to toast');
       toast.success(`${res.data.name} is created.`);
+      loadCategories();
     } catch (error) {
-      console.log('from create category', error);
+      console.log('from create category', error.response);
       setLoading(false);
-      toast.error(error.message);
+      toast.error(error.response.data.err);
     }
   };
 
-  const categoryForm = () => (
-    <form onSubmit={handleSubmit}>
-      <div className='form-group'>
-        <label>Name</label>
-        <input
-          type='text'
-          className='form-control'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          autoFocus
-          required
-        />
-      </div>
-      <button className='btn btn-outline-primary'>Save</button>
-    </form>
-  );
+  const handleRemove = async (slug) => {
+    if (window.confirm('Delete?')) {
+      setLoading(true);
+      try {
+        const res = await removeCategory(slug, user.token);
+        setLoading(false);
+        toast.success(`${res.data.name} is deleted.`);
+        loadCategories();
+      } catch (error) {
+        setLoading(false);
+        console.log('From delete category', error.response);
+        toast.error(error.response.data.err);
+      }
+    }
+  };
+
+  //search-filter
+  const search = (keyword) => (category) =>
+    category.name.toLowerCase().includes(keyword.toLowerCase());
 
   return (
     <div className='container-fluid'>
@@ -58,8 +79,36 @@ const CategoryCreate = () => {
           <AdminNav />
         </div>
         <div className='col-md-10'>
-          <h4>Create category</h4>
-          {categoryForm()}
+          {loading ? (
+            <h4 className='text-danger'>Loading...</h4>
+          ) : (
+            <h4>Create Category</h4>
+          )}
+          <CategoryForm
+            handleRemove={handleSubmit}
+            name={name}
+            setName={setName}
+          />
+
+          <LocalSearch keyword={keyword} setKeyword={setKeyword} />
+
+          {categories.length &&
+            categories.filter(search(keyword)).map((category) => (
+              <div key={category._id} className='alert alert-secondary'>
+                {category.name}{' '}
+                <span
+                  className='btn btn-sm float-right'
+                  onClick={() => handleRemove(category.slug)}
+                >
+                  <DeleteOutlined className='text-danger' />
+                </span>{' '}
+                <Link to={`/admin/category/${category.slug}`}>
+                  <span className='btn btn-sm float-right'>
+                    <EditOutlined className='text-warning' />
+                  </span>
+                </Link>
+              </div>
+            ))}
         </div>
       </div>
     </div>
