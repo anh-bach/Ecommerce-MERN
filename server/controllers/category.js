@@ -1,6 +1,7 @@
 const Category = require('../models/category');
 const slugify = require('slugify');
 const catchAsync = require('../utils/catchAsync');
+const Subs = require('../models/sub');
 
 exports.create = catchAsync(
   async (req, res) => {
@@ -58,4 +59,15 @@ exports.update = catchAsync(
   'Error from category update controller',
   400,
   'update category failed'
+);
+
+exports.getSubs = catchAsync(
+  async (req, res) => {
+    const subs = await Subs.find({ parent: req.params._id });
+
+    res.json(subs);
+  },
+  'Error from category get subs controller',
+  400,
+  'get sub category failed'
 );
