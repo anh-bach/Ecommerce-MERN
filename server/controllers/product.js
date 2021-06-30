@@ -47,3 +47,20 @@ exports.read = catchAsync(
   'from read single product',
   400
 );
+
+exports.update = catchAsync(
+  async (req, res) => {
+    if (req.body.title) {
+      req.body.slug = slugify(req.body.title);
+    }
+    const product = await Product.findOneAndUpdate(
+      { slug: req.params.slug },
+      req.body,
+      { new: true }
+    );
+
+    res.json(product);
+  },
+  'from update product',
+  400
+);

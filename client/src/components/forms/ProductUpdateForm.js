@@ -9,13 +9,17 @@ const ProductUpdateForm = ({
   values,
   setValues,
   handleCategoryChange,
+  categories,
+  subOptions,
+  arrayOfSubIds,
+  setArrayOfSubIds,
+  selectedCategory,
 }) => {
   const {
     title,
     description,
     price,
     category,
-    categories,
     subs,
     shipping,
     quantity,
@@ -25,6 +29,7 @@ const ProductUpdateForm = ({
     color,
     brand,
   } = values;
+
   return (
     <form onSubmit={handleSubmit}>
       <div className='form-group'>
@@ -119,10 +124,9 @@ const ProductUpdateForm = ({
           className='form-control'
           name='category'
           onChange={handleCategoryChange}
-          value={category}
+          value={selectedCategory || category._id}
           required
         >
-          <option value=''>Please select category</option>
           {categories.length > 0 &&
             categories.map((category) => (
               <option key={category._id} value={category._id}>
@@ -130,6 +134,24 @@ const ProductUpdateForm = ({
               </option>
             ))}
         </select>
+      </div>
+
+      <div className='form-group'>
+        <label>Sub categories</label>
+        <Select
+          mode='multiple'
+          style={{ width: '100%' }}
+          placeholder='Please select'
+          value={arrayOfSubIds}
+          onChange={(value) => setArrayOfSubIds(value)}
+        >
+          {subOptions.length &&
+            subOptions.map((sub) => (
+              <Option key={sub._id} value={sub._id}>
+                {sub.name}
+              </Option>
+            ))}
+        </Select>
       </div>
 
       <button className='btn btn-outline-info'>Save</button>

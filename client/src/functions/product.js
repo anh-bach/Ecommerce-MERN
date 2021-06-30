@@ -31,3 +31,15 @@ export const removeProduct = async (slug, authtoken) => {
     },
   });
 };
+
+export const updateProduct = async (slug, values, authtoken) => {
+  return await axios.put(
+    `${process.env.REACT_APP_API}/product/${slug}`,
+    { ...values },
+    {
+      headers: {
+        authtoken,
+      },
+    }
+  );
+};
