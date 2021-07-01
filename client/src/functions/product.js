@@ -43,3 +43,11 @@ export const updateProduct = async (slug, values, authtoken) => {
     }
   );
 };
+
+export const ListProducts = async (sort, order, limit) => {
+  return await axios.post(`${process.env.REACT_APP_API}/products/`, {
+    sort,
+    order,
+    limit,
+  });
+};
