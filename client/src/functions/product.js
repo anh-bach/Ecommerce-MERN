@@ -44,10 +44,14 @@ export const updateProduct = async (slug, values, authtoken) => {
   );
 };
 
-export const ListProducts = async (sort, order, limit) => {
+export const listProducts = async (sort, order, page) => {
   return await axios.post(`${process.env.REACT_APP_API}/products/`, {
     sort,
     order,
-    limit,
+    page,
   });
+};
+
+export const getProductsCount = async () => {
+  return await axios.get(`${process.env.REACT_APP_API}/products/total`);
 };

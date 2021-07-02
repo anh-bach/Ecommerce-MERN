@@ -64,3 +64,33 @@ exports.update = catchAsync(
   'from update product',
   400
 );
+
+exports.list = catchAsync(
+  async (req, res) => {
+    //createdAt/updatedAt, desc/asc, limit
+    const { sort, order, page } = req.body;
+    const currentPage = page || 1;
+    const perPage = 3;
+
+    const products = await Product.find({})
+      .skip((currentPage - 1) * perPage)
+      .populate('category')
+      .populate('subs')
+      .sort([[sort, order]])
+      .limit(perPage);
+
+    res.json(products);
+  },
+  'from list product',
+  400
+);
+
+exports.productsCount = catchAsync(
+  async (req, res) => {
+    const total = await Product.estimatedDocumentCount({});
+
+    res.json(total);
+  },
+  'from list product',
+  400
+);

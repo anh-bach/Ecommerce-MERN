@@ -82,7 +82,6 @@ const ProductUpdate = ({ history }) => {
       setLoading(false);
       toast.success(`${res.data.title} is updated.`);
       history.push('/admin/products');
-      console.log(values);
     } catch (error) {
       console.log('from update product', error.response);
       setLoading(false);
