@@ -27,10 +27,16 @@ const Login = () => {
   const history = useHistory();
   //redirect base on user role
   const roleBasedRedirect = (res) => {
-    if (res.data.role === 'admin') {
-      history.push('/admin/dashboard');
+    //check if intended path from history location state
+    let intended = history.location.state;
+    if (intended) {
+      history.push(intended.from);
     } else {
-      history.push('/user/history');
+      if (res.data.role === 'admin') {
+        history.push('/admin/dashboard');
+      } else {
+        history.push('/user/history');
+      }
     }
   };
 
@@ -39,6 +45,7 @@ const Login = () => {
   useEffect(() => {
     if (user && user.token) history.push('/');
   }, [user, history]);
+
   //1))submit form login
   const handleSubmit = async (e) => {
     e.preventDefault();
