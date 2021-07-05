@@ -9,6 +9,8 @@ const {
   update,
   list,
   productsCount,
+  productStar,
+  listRelated,
 } = require('../controllers/product');
 //middlewares
 const { authCheck, adminCheck } = require('../middlewares/auth');
@@ -20,10 +22,12 @@ router.post('/product', authCheck, adminCheck, create); //using AdminRoute inste
 router.post('/products', list);
 
 router.put('/product/:slug', authCheck, adminCheck, update);
+router.put('/product/star/:productId', authCheck, productStar);
 
 router.get('/products/total', productsCount);
 router.get('/products/:count', listAll);
 router.get('/product/:slug', read);
+router.get('/product/related/:productId', listRelated);
 
 router.delete('/product/:slug', authCheck, adminCheck, remove);
 

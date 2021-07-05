@@ -1,6 +1,7 @@
 const slugify = require('slugify');
 
 const Product = require('../models/product');
+const User = require('../models/user');
 const catchAsync = require('../utils/catchAsync');
 
 exports.create = catchAsync(
@@ -92,5 +93,61 @@ exports.productsCount = catchAsync(
     res.json(total);
   },
   'from list product',
+  400
+);
+
+exports.productStar = catchAsync(
+  async (req, res) => {
+    const product = await Product.findById(req.params.productId);
+    const user = await User.findOne({ email: req.user.email });
+    const { star } = req.body;
+
+    //who is updating
+    //check if user has already rated
+    let existingRatingObj = product.ratings.find(
+      (el) => el.postedBy.toString() === user._id.toString()
+    );
+    //if´user hasnot rated yet
+    if (!existingRatingObj) {
+      let ratingAdded = await Product.findByIdAndUpdate(
+        product._id,
+        {
+          $push: { ratings: { star, postedBy: user._id } },
+        },
+        { new: true }
+      );
+      res.json({ ratingAdded });
+    } else {
+      //if user already left rating, updating it
+
+      const ratingUpdated = await Product.updateOne(
+        {
+          ratings: { $elemMatch: existingRatingObj },
+        },
+        { $set: { 'ratings.$.star': star } },
+        { new: true }
+      );
+      res.json(ratingUpdated);
+    }
+  },
+  'from product star',
+  400
+);
+
+exports.listRelated = catchAsync(
+  async (req, res) => {
+    const product = await Product.findById(req.params.productId);
+    const related = await Product.find({
+      _id: { $ne: product._id },
+      category: product.category,
+    })
+      .limit(3)
+      .populate('category')
+      .populate('subs')
+      .populate('postedBy');
+
+    res.json(related);
+  },
+  'from list related products',
   400
 );

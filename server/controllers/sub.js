@@ -1,4 +1,5 @@
 const Sub = require('../models/sub');
+const Product = require('../models/product');
 const slugify = require('slugify');
 const catchAsync = require('../utils/catchAsync');
 
@@ -16,8 +17,9 @@ exports.create = catchAsync(
 exports.read = catchAsync(
   async (req, res) => {
     const sub = await Sub.findOne({ slug: req.params.slug });
+    const products = await Product.find({ subs: sub }).populate('category');
     if (!sub) throw Error('No such sub category found');
-    res.json(sub);
+    res.json({ sub, products });
   },
   'Error from sub category read controller',
   400,

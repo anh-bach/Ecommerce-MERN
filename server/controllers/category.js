@@ -2,6 +2,7 @@ const Category = require('../models/category');
 const slugify = require('slugify');
 const catchAsync = require('../utils/catchAsync');
 const Subs = require('../models/sub');
+const Product = require('../models/product');
 
 exports.create = catchAsync(
   async (req, res) => {
@@ -17,8 +18,12 @@ exports.create = catchAsync(
 exports.read = catchAsync(
   async (req, res) => {
     const category = await Category.findOne({ slug: req.params.slug });
+    const products = await Product.find({ category })
+      .populate('category')
+      .populate('postedBy', '_id name');
+
     if (!category) throw Error('No such category found');
-    res.json(category);
+    res.json({ category, products });
   },
   'Error from category read controller',
   400,
