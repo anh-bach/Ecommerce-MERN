@@ -11,6 +11,7 @@ const {
   productsCount,
   productStar,
   listRelated,
+  searchFilter,
 } = require('../controllers/product');
 //middlewares
 const { authCheck, adminCheck } = require('../middlewares/auth');
@@ -20,6 +21,7 @@ const router = express.Router();
 //routes
 router.post('/product', authCheck, adminCheck, create); //using AdminRoute instead - but we can use adminCheck if we do request from Postman
 router.post('/products', list);
+router.post('/search/filters', searchFilter);
 
 router.put('/product/:slug', authCheck, adminCheck, update);
 router.put('/product/star/:productId', authCheck, productStar);

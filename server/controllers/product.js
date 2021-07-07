@@ -151,3 +151,24 @@ exports.listRelated = catchAsync(
   'from list related products',
   400
 );
+
+//helper functions to hanlde query
+const handleQuery = async (req, res, query) => {
+  const products = await Product.find({ $text: { $search: query } })
+    .populate('category', '_id name')
+    .populate('subs', '_id name')
+    .populate('postedBy', '_id name');
+
+  res.json(products);
+};
+
+exports.searchFilter = catchAsync(
+  async (req, res) => {
+    const { query } = req.body;
+    if (query) {
+      await handleQuery(req, res, query);
+    }
+  },
+  'from list search filter products',
+  400
+);

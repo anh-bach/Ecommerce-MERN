@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
       {product && product.ratings && product.ratings.length > 0 ? (
         showAverage(product)
       ) : (
-        <div className='text-center pb-3'>No rating yet</div>
+        <div className='text-center pt-1 pb-3'>No rating yet</div>
       )}
       <Card
         cover={

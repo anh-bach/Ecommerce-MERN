@@ -3,7 +3,7 @@ import React, { Fragment } from 'react';
 import Jumbotron from '../components/cards/Jumbotron';
 import NewArrivals from '../components/home/NewArrivals';
 import BestSellers from '../components/home/BestSellers';
-import CategoryList from '../components/catgory/CategoryList';
+import CategoryList from '../components/category/CategoryList';
 import SubList from '../components/sub/SubList';
 
 const Home = () => {
