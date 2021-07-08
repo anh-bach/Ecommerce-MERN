@@ -8,7 +8,6 @@ const productSchema = new mongoose.Schema(
       trim: true,
       required: true,
       maxlength: 32,
-      text: true,
     },
     slug: {
       type: String,
@@ -20,7 +19,6 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
       maxlength: 2000,
-      text: true,
     },
     price: {
       type: Number,
@@ -72,4 +70,8 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Product', productSchema);
+const Product = mongoose.model('Product', productSchema);
+
+Product.createIndexes({ title: 'text', description: 'text' });
+
+module.exports = Product;
