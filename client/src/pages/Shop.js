@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Menu from 'antd/lib/menu';
 import Slider from 'antd/lib/slider';
-import { DollarOutlined } from '@ant-design/icons';
+import { DollarOutlined, DownSquareOutlined } from '@ant-design/icons';
+import Checkbox from 'antd/lib/checkbox';
 
 import {
   fetchProductsByFilter,
   getProductsByCount,
 } from '../functions/product';
+import { getCategories } from '../functions/category';
 import ProductCard from '../components/cards/ProductCard';
 import { SEARCH_QUERY } from '../actions/types';
 
@@ -18,12 +20,15 @@ const Shop = () => {
   const search = useSelector((state) => state.search);
   let { text } = search;
   const [products, setProducts] = useState([]);
-  const [price, setPrice] = useState([0, 0]);
+  const [price, setPrice] = useState([0, 9999]);
   const [ok, setOk] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   //1)).load products on page load by default
   useEffect(() => {
     loadAllProducts();
+    loadCategories();
   }, []);
 
   const loadAllProducts = async () => {
@@ -75,12 +80,54 @@ const Shop = () => {
     }, 300);
   };
 
+  //4))Search on product category
+  const loadCategories = async () => {
+    try {
+      const res = await getCategories();
+      setCategories(res.data);
+    } catch (error) {
+      console.log('From loadcatgories Shop.js', error.response);
+    }
+  };
+
+  const handleCheck = async (e) => {
+    try {
+      //hanlde selectedCategories check and avoid duplicated categories in the state
+      let inTheState = [...selectedCategories];
+      let justChecked = e.target.value;
+      let foundInTheState = inTheState.indexOf(justChecked);
+      foundInTheState < 0
+        ? inTheState.push(justChecked)
+        : inTheState.splice(foundInTheState, 1);
+      setSelectedCategories(inTheState);
+      await fetchProducts({ category: inTheState[0] });
+    } catch (error) {
+      console.log('From handle check categories Shop.js', error.response);
+    }
+  };
+
+  const showCategories = () =>
+    categories.map((category) => (
+      <div key={category._id}>
+        <Checkbox
+          className='pb-2 pl-4 pr-4'
+          value={category._id}
+          onChange={handleCheck}
+          name='category'
+          checked={selectedCategories.includes(category._id)}
+        >
+          {category.name}
+        </Checkbox>
+      </div>
+    ));
+
   return (
     <div className='container-fluid'>
       <div className='row'>
         <div className='col-md-3 pt-2'>
           <h4>Search/Filter</h4>
           <Menu mode='inline' defaultOpenKeys={['1', '2']}>
+            {/* Price Range */}
             <SubMenu
               key='1'
               title={
@@ -99,6 +146,17 @@ const Shop = () => {
                   onChange={(value) => handleSlider(value)}
                 />
               </div>
+            </SubMenu>
+            {/* categories */}
+            <SubMenu
+              key='2'
+              title={
+                <span className='h6'>
+                  <DownSquareOutlined /> Categories
+                </span>
+              }
+            >
+              <div>{categories.length && showCategories()}</div>
             </SubMenu>
           </Menu>
         </div>
