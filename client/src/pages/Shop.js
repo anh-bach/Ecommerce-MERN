@@ -73,7 +73,10 @@ const Shop = () => {
   };
 
   const handleSlider = (value) => {
+    //clear other state first
     dispatch({ type: SEARCH_QUERY, payload: { text: '' } });
+    setSelectedCategories([]);
+
     setPrice(value);
     setTimeout(() => {
       setOk(!ok);
@@ -92,6 +95,9 @@ const Shop = () => {
 
   const handleCheck = async (e) => {
     try {
+      //clear other state
+      dispatch({ type: SEARCH_QUERY, payload: { text: '' } });
+      setPrice([0, 9999]);
       //hanlde selectedCategories check and avoid duplicated categories in the state
       let inTheState = [...selectedCategories];
       let justChecked = e.target.value;
@@ -100,7 +106,7 @@ const Shop = () => {
         ? inTheState.push(justChecked)
         : inTheState.splice(foundInTheState, 1);
       setSelectedCategories(inTheState);
-      await fetchProducts({ category: inTheState[0] });
+      await fetchProducts({ category: inTheState });
     } catch (error) {
       console.log('From handle check categories Shop.js', error.response);
     }

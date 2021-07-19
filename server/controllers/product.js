@@ -180,14 +180,34 @@ const hanldeCategory = async (req, res, category) => {
     .populate('category', '_id name')
     .populate('subs', '_id name')
     .populate('postedBy', '_id name');
-  console.log(products);
+
+  res.json(products);
+};
+
+//helper functions to hanlde stars
+const handleStars = async (req, res, stars) => {
+  const aggregates = await Product.aggregate([
+    {
+      $project: {
+        document: '$$ROOT' /**get all existing fields from Product */,
+        floorAverage: {
+          $floor: { $avg: '$ratings.star' },
+        },
+      },
+    },
+    { $match: { floorAverage: stars } },
+  ]).limit(12);
+  const products = await Product.find({ _id: aggregates })
+    .populate('category', '_id name')
+    .populate('subs', '_id name')
+    .populate('postedBy', '_id name');
 
   res.json(products);
 };
 
 exports.searchFilter = catchAsync(
   async (req, res) => {
-    const { query, price, category } = req.body;
+    const { query, price, category, stars } = req.body;
     //search query
     if (query) {
       await handleQuery(req, res, query);
@@ -200,8 +220,12 @@ exports.searchFilter = catchAsync(
 
     //category
     if (category) {
-      console.log('category--->', category);
-      await hanldeCategory(req, res, price);
+      await hanldeCategory(req, res, category);
+    }
+
+    //stars
+    if (stars) {
+      await handleStars(req, res, stars);
     }
   },
   'from list search filter products',
