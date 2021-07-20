@@ -1,6 +1,5 @@
 import React, { useState, Fragment } from 'react';
 import Modal from 'antd/lib/modal';
-import Button from 'antd/lib/button';
 import { StarOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';

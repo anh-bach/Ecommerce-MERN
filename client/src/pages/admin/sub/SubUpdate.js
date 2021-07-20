@@ -7,7 +7,6 @@ import { getCategories } from '../../../functions/category';
 import { getSub, updateSub } from '../../../functions/sub';
 import AdminNav from '../../../components/nav/AdminNav';
 import CategoryForm from '../../../components/forms/CategoryForm';
-import LocalSearch from '../../../components/forms/LocalSearch';
 
 const SubUpdate = ({ history }) => {
   const [name, setName] = useState('');
