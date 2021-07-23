@@ -1,0 +1,103 @@
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+
+import ProductCardInCheckout from '../components/cards/ProductCardInCheckout';
+
+const Cart = () => {
+  //redux
+  const { cart, user } = useSelector((state) => state);
+  const dispatch = useDispatch();
+
+  const getTotal = (cart) => {
+    return cart.reduce(
+      (accumulator, item) => accumulator + item.count * item.price,
+      0
+    );
+  };
+
+  const showCartItems = () => (
+    <table className='table table-bordered'>
+      <thead className='thead-light'>
+        <tr>
+          <th scope='col'>Image</th>
+          <th scope='col'>Title</th>
+          <th scope='col'>Price</th>
+          <th scope='col'>Brand</th>
+          <th scope='col'>Color</th>
+          <th scope='col'>Count</th>
+          <th scope='col'>Shipping</th>
+          <th scope='col'>Remove</th>
+        </tr>
+      </thead>
+      <tbody>
+        {cart.length > 0 &&
+          cart.map((item) => (
+            <ProductCardInCheckout key={item._id} product={item} />
+          ))}
+      </tbody>
+    </table>
+  );
+
+  const saveOrderToDb = () => {
+    //
+  };
+
+  return (
+    <div className='container-fluid pt-2'>
+      <div className='row'>
+        <div className='col-md-8'>
+          <h4>Card / {cart.length} Products</h4>
+
+          {cart.length > 0 ? (
+            showCartItems()
+          ) : (
+            <p>
+              No products in cart. <Link to='/shop'>Continue Shopping</Link>
+            </p>
+          )}
+        </div>
+        <div className='col-md-4'>
+          <h4>Order Summary</h4>
+          <hr />
+          <p>Products</p>
+          {cart.length > 0 &&
+            cart.map((item, index) => (
+              <div key={index}>
+                <p>
+                  {item.title} x {item.count} = ${item.count * item.price}
+                </p>
+              </div>
+            ))}
+          <hr />
+          <div>
+            Total: <b>${getTotal(cart)}</b>
+          </div>
+          <hr />
+          {user ? (
+            <button
+              onClick={saveOrderToDb}
+              className='btn btn-sm btn-primary mt-2'
+              disabled={!cart.length}
+            >
+              Proceed to Checkout
+            </button>
+          ) : (
+            <button className='btn btn-sm btn-primary mt-2'>
+              <Link
+                to={{
+                  pathname: '/login',
+                  state: { from: 'cart' },
+                }}
+              >
+                Login to Checkout
+              </Link>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Cart;

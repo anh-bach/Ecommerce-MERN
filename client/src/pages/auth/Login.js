@@ -19,7 +19,7 @@ import {
 import { LOGGED_IN_USER } from '../../actions/types';
 import { createOrUpdateUser } from '../../functions/auth';
 
-const Login = () => {
+const Login = ({ location }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,8 @@ const Login = () => {
   //redirect base on user role
   const roleBasedRedirect = (res) => {
     //check if intended path from history location state
-    let intended = history.location.state;
+    let intended = location.state;
+
     if (intended) {
       history.push(intended.from);
     } else {

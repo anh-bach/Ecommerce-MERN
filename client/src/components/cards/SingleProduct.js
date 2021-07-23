@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import Card from 'antd/lib/card';
 import Skeleton from 'antd/lib/skeleton';
 import { Link } from 'react-router-dom';
@@ -7,16 +7,59 @@ import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Tabs from 'antd/lib/tabs';
 import StarRating from 'react-star-ratings';
+import Tooltip from 'antd/lib/tooltip';
+import _ from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
 
 import laptop from '../../images/laptop.png';
 import ProductListItem from './ProductListItem';
 import RatingModal from '../modal/RatingModal';
 import showAverage from '../../functions/rating';
+import { ADD_TO_CART, SET_VISIBLE } from '../../actions/types';
 
 const { TabPane } = Tabs;
 
 const SingleProduct = ({ product, onStarClick, star }) => {
   const { title, images, description, _id } = product;
+
+  const [tooltip, setTooltip] = useState('Click to add');
+  //redux
+  const dispatch = useDispatch();
+  const { user, cart } = useSelector((state) => state);
+
+  const handleAddToCart = (product) => {
+    //create cart array
+    let cart = [];
+    if (typeof window !== 'undefined') {
+      //if cart is in the localStorage
+      if (localStorage.getItem('cart')) {
+        cart = JSON.parse(localStorage.getItem('cart'));
+      }
+      //push new product to Cart
+      cart.push({
+        ...product,
+        count: 1,
+      });
+
+      //remove duplicates
+      let unique = _.uniqWith(cart, _.isEqual);
+
+      //save to localStorage
+      localStorage.setItem('cart', JSON.stringify(unique));
+      //Add to redux store
+      dispatch({
+        type: ADD_TO_CART,
+        payload: unique,
+      });
+      //show drawers
+      dispatch({
+        type: SET_VISIBLE,
+        payload: true,
+      });
+      //show tooltip
+      setTooltip('Added');
+    }
+  };
 
   return (
     <Fragment>
@@ -59,11 +102,12 @@ const SingleProduct = ({ product, onStarClick, star }) => {
         <Card
           className='p-1'
           actions={[
-            <Fragment>
-              <ShoppingCartOutlined className='text-success' />
-              <br />
-              Add to Cart
-            </Fragment>,
+            <Tooltip title={tooltip}>
+              <a onClick={() => handleAddToCart(product)}>
+                <ShoppingCartOutlined className='text-danger' />
+                <br /> Add to Cart{' '}
+              </a>
+            </Tooltip>,
             <Link to='#'>
               <HeartOutlined className='text-info' /> <br />
               Add to Wishlist

@@ -1,14 +1,57 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import Card from 'antd/lib/card';
 import { EyeOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import _ from 'lodash';
+import Tooltip from 'antd/lib/tooltip';
+import { useDispatch, useSelector } from 'react-redux';
 
 import laptop from '../../images/laptop.png';
 import showAverage from '../../functions/rating';
+import { ADD_TO_CART, SET_VISIBLE } from '../../actions/types';
 const { Meta } = Card;
 
 const ProductCard = ({ product }) => {
   const { images, slug, title, description, price } = product;
+  const [tooltip, setTooltip] = useState('Click to add');
+  //redux
+  const dispatch = useDispatch();
+  const { user, cart } = useSelector((state) => state);
+
+  const handleAddToCart = (product) => {
+    //create cart array
+    let cart = [];
+    if (typeof window !== 'undefined') {
+      //if cart is in the localStorage
+      if (localStorage.getItem('cart')) {
+        cart = JSON.parse(localStorage.getItem('cart'));
+      }
+      //push new product to Cart
+      cart.push({
+        ...product,
+        count: 1,
+      });
+
+      //remove duplicates
+      let unique = _.uniqWith(cart, _.isEqual);
+
+      //save to localStorage
+      localStorage.setItem('cart', JSON.stringify(unique));
+      //Add to redux store
+      dispatch({
+        type: ADD_TO_CART,
+        payload: unique,
+      });
+      //show drawers
+      dispatch({
+        type: SET_VISIBLE,
+        payload: true,
+      });
+      //show tooltip
+      setTooltip('Added');
+    }
+  };
+
   return (
     <Fragment>
       {product && product.ratings && product.ratings.length > 0 ? (
@@ -29,10 +72,12 @@ const ProductCard = ({ product }) => {
           <Link to={`/product/${slug}`}>
             <EyeOutlined className='text-warning' /> <br /> View Product
           </Link>,
-          <Fragment>
-            <ShoppingCartOutlined className='text-danger' />
-            <br /> Add to Cart{' '}
-          </Fragment>,
+          <Tooltip title={tooltip}>
+            <a onClick={() => handleAddToCart(product)}>
+              <ShoppingCartOutlined className='text-danger' />
+              <br /> Add to Cart{' '}
+            </a>
+          </Tooltip>,
         ]}
       >
         <Meta
