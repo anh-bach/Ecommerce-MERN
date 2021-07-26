@@ -27,6 +27,7 @@ const ProductCard = ({ product }) => {
         cart = JSON.parse(localStorage.getItem('cart'));
       }
       //push new product to Cart
+
       cart.push({
         ...product,
         count: 1,
@@ -34,6 +35,7 @@ const ProductCard = ({ product }) => {
 
       //remove duplicates
       let unique = _.uniqWith(cart, _.isEqual);
+      console.log(unique);
 
       //save to localStorage
       localStorage.setItem('cart', JSON.stringify(unique));

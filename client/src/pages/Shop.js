@@ -65,6 +65,7 @@ const Shop = () => {
       setLoading(true);
       const res = await getProductsByCount(12);
       setProducts(res.data);
+
       setLoading(false);
     } catch (error) {
       console.log('From Shop - load all products default', error);
@@ -95,6 +96,7 @@ const Shop = () => {
   const fetchProducts = async (arg) => {
     try {
       const res = await fetchProductsByFilter(arg);
+
       setProducts(res.data);
     } catch (error) {
       console.log('From Shop - fetch products default', error);

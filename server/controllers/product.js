@@ -19,8 +19,9 @@ exports.listAll = catchAsync(
   async (req, res) => {
     const products = await Product.find({})
       .limit(parseInt(req.params.count))
-      .populate('category')
-      .populate('subs')
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name')
       .sort([['createdAt', 'desc']]);
     res.json(products);
   },
@@ -40,8 +41,9 @@ exports.remove = catchAsync(
 exports.read = catchAsync(
   async (req, res) => {
     const product = await Product.findOne({ slug: req.params.slug })
-      .populate('category')
-      .populate('subs');
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name');
 
     res.json(product);
   },
@@ -75,8 +77,9 @@ exports.list = catchAsync(
 
     const products = await Product.find({})
       .skip((currentPage - 1) * perPage)
-      .populate('category')
-      .populate('subs')
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name')
       .sort([[sort, order]])
       .limit(perPage);
 
@@ -142,9 +145,9 @@ exports.listRelated = catchAsync(
       category: product.category,
     })
       .limit(3)
-      .populate('category')
-      .populate('subs')
-      .populate('postedBy');
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name');
 
     res.json(related);
   },

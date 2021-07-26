@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import ProductCardInCheckout from '../components/cards/ProductCardInCheckout';
 
-const Cart = () => {
+const Cart = ({ history }) => {
   //redux
   const { cart, user } = useSelector((state) => state);
   const dispatch = useDispatch();
@@ -40,7 +40,9 @@ const Cart = () => {
   );
 
   const saveOrderToDb = () => {
-    //
+    //save order in database
+
+    history.push('/checkout');
   };
 
   return (

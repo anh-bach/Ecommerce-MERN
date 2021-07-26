@@ -26,6 +26,7 @@ const NewArrivals = () => {
       setLoading(true);
       const res = await listProducts('createdAt', 'descending', page);
       setProducts(res.data);
+
       setLoading(false);
     } catch (error) {
       console.log('From NewArrivals loading products', error.response);
