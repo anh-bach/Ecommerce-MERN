@@ -75,7 +75,10 @@ const Shop = () => {
   //2)) Load products on user search input
   useEffect(() => {
     //if search is empty, get all products
-    if (!text) loadAllProducts();
+    if (!text) {
+      return loadAllProducts();
+    }
+
     //user enters search
     const delayed = setTimeout(() => {
       fetchProducts({ query: text });
@@ -147,6 +150,11 @@ const Shop = () => {
         ? inTheState.push(justChecked)
         : inTheState.splice(foundInTheState, 1);
       setSelectedCategories(inTheState);
+
+      //if there is no categories selected, load all products
+      if (inTheState.length === 0) {
+        return loadAllProducts();
+      }
       await fetchProducts({ category: inTheState });
     } catch (error) {
       console.log('From handle check categories Shop.js', error);

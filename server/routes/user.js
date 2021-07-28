@@ -1,9 +1,18 @@
 const express = require('express');
 
+const {
+  userCart,
+  getUserCart,
+  emptyCart,
+  saveAddress,
+} = require('../controllers/user');
+const { authCheck } = require('../middlewares/auth');
+
 const router = express.Router();
 
-router.get('/user', (req, res) => {
-  res.json({ data: 'you hit the user endpoint' });
-});
+router.post('/user/cart', authCheck, userCart);
+router.get('/user/cart', authCheck, getUserCart);
+router.delete('/user/cart', authCheck, emptyCart);
+router.post('/user/address', authCheck, saveAddress);
 
 module.exports = router;

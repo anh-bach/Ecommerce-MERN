@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import ProductCardInCheckout from '../components/cards/ProductCardInCheckout';
+import { userCart } from '../functions/user';
 
 const Cart = ({ history }) => {
   //redux
@@ -39,10 +40,14 @@ const Cart = ({ history }) => {
     </table>
   );
 
-  const saveOrderToDb = () => {
-    //save order in database
-
-    history.push('/checkout');
+  const saveOrderToDb = async (cart, authToken) => {
+    try {
+      //save order in database
+      const res = await userCart(cart, authToken);
+      if (res.data.ok) history.push('/checkout');
+    } catch (error) {
+      console.log('From saveOrderToDb', error);
+    }
   };
 
   return (
@@ -78,7 +83,7 @@ const Cart = ({ history }) => {
           <hr />
           {user ? (
             <button
-              onClick={saveOrderToDb}
+              onClick={() => saveOrderToDb(cart, user.token)}
               className='btn btn-sm btn-primary mt-2'
               disabled={!cart.length}
             >
