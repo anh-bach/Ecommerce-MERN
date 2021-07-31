@@ -7,6 +7,8 @@ import { DollarOutlined, CheckOutlined } from '@ant-design/icons';
 
 import Laptop from '../../images/laptop.png';
 import { createPaymentIntent } from '../../functions/stripe';
+import { createOrder, emptyUserCart } from '../../functions/user';
+import { ADD_TO_CART, COUPON_APPLIED } from '../../actions/types';
 
 const cartStyle = {
   style: {
@@ -59,29 +61,40 @@ const StripeCheckout = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setProcessing(true);
+    try {
+      e.preventDefault();
+      setProcessing(true);
 
-    const payload = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-        billing_details: {
-          name: e.target.name.value,
+      const payload = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: {
+            name: e.target.name.value,
+          },
         },
-      },
-    });
+      });
 
-    if (payload.error) {
-      setError(`Payment failed ${payload.error.message}`);
-      setProcessing(false);
-    } else {
-      //result after successful payment
-      //create order and save in database for admin to process
-      //empty user cart from redux and localStorage
+      if (payload.error) {
+        setError(`Payment failed ${payload.error.message}`);
+        setProcessing(false);
+      } else {
+        //result after successful payment
+        //create order and save in database for admin to process
+        const res = await createOrder(user.token, payload);
+        if (res.data.ok) {
+          //empty user cart from redux and localStorage, reset coupon in redux, emptycart in db
+          if (typeof window !== 'undefined') localStorage.removeItem('cart');
+          dispatch({ type: ADD_TO_CART, payload: [] });
+          dispatch({ type: COUPON_APPLIED, payload: false });
+          await emptyUserCart(user.token);
+        }
 
-      setError(null);
-      setProcessing(false);
-      setSucceeded(true);
+        setError(null);
+        setProcessing(false);
+        setSucceeded(true);
+      }
+    } catch (error) {
+      console.log('From submit payment', error);
     }
   };
 

@@ -131,8 +131,33 @@ exports.createOrder = catchAsync(
       orderedBy: user._id,
     }).save();
 
+    //update Product collection - increment sold
+    let bulkOption = products.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.product._id },
+          update: { $inc: { quantity: -item.count, sold: +item.count } },
+        },
+      };
+    });
+
+    await Product.bulkWrite(bulkOption, {});
+
     res.json({ ok: true });
   },
   'from create order',
+  400
+);
+
+exports.getOrders = catchAsync(
+  async (req, res) => {
+    let user = await User.findOne({ email: req.user.email });
+    let userOrders = await Order.find({ orderedBy: user._id }).populate(
+      'products.product'
+    );
+
+    res.json({ userOrders });
+  },
+  'from get orders',
   400
 );

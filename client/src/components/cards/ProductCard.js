@@ -4,7 +4,7 @@ import { EyeOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import _ from 'lodash';
 import Tooltip from 'antd/lib/tooltip';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import laptop from '../../images/laptop.png';
 import showAverage from '../../functions/rating';
@@ -12,11 +12,10 @@ import { ADD_TO_CART, SET_VISIBLE } from '../../actions/types';
 const { Meta } = Card;
 
 const ProductCard = ({ product }) => {
-  const { images, slug, title, description, price } = product;
+  const { images, slug, title, description, price, quantity } = product;
   const [tooltip, setTooltip] = useState('Click to add');
   //redux
   const dispatch = useDispatch();
-  const { user, cart } = useSelector((state) => state);
 
   const handleAddToCart = (product) => {
     //create cart array
@@ -75,9 +74,9 @@ const ProductCard = ({ product }) => {
             <EyeOutlined className='text-warning' /> <br /> View Product
           </Link>,
           <Tooltip title={tooltip}>
-            <a onClick={() => handleAddToCart(product)}>
+            <a onClick={() => handleAddToCart(product)} disabled={!quantity}>
               <ShoppingCartOutlined className='text-danger' />
-              <br /> Add to Cart{' '}
+              <br /> {quantity < 1 ? 'Out of stock' : 'Add to Cart'}
             </a>
           </Tooltip>,
         ]}
