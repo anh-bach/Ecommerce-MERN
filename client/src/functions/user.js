@@ -52,8 +52,44 @@ export const createOrder = async (authToken, stripeResponse) => {
   );
 };
 
+export const createCashOrderForUser = async (authToken, COD, coupon) => {
+  return await axios.post(
+    `${process.env.REACT_APP_API}/user/cash-order`,
+    { COD, couponApplied: coupon },
+    {
+      headers: { authToken },
+    }
+  );
+};
+
 export const getUserOrders = async (authToken) => {
   return await axios.get(`${process.env.REACT_APP_API}/user/orders`, {
     headers: { authToken },
   });
+};
+
+export const getWishlist = async (authToken) => {
+  return await axios.get(`${process.env.REACT_APP_API}/user/wishlist`, {
+    headers: { authToken },
+  });
+};
+
+export const addWishlist = async (authToken, productId) => {
+  return await axios.post(
+    `${process.env.REACT_APP_API}/user/wishlist`,
+    { productId },
+    {
+      headers: { authToken },
+    }
+  );
+};
+
+export const removeWishlist = async (authToken, productId) => {
+  return await axios.put(
+    `${process.env.REACT_APP_API}/user/wishlist/${productId}`,
+    {},
+    {
+      headers: { authToken },
+    }
+  );
 };

@@ -1,3 +1,5 @@
+const uniqueid = require('uniqueid');
+
 const Product = require('../models/product');
 const User = require('../models/user');
 const Cart = require('../models/cart');
@@ -97,7 +99,7 @@ exports.applyCouponToUserCart = catchAsync(
       return res.json({ err: 'Invalid Coupon' });
     } else {
       const user = await User.findOne({ email: req.user.email });
-      let { products, cartTotal } = await Cart.findOne({
+      let { cartTotal } = await Cart.findOne({
         orderedBy: user._id,
       }).populate('products.product', '_id title price');
 
@@ -145,19 +147,112 @@ exports.createOrder = catchAsync(
 
     res.json({ ok: true });
   },
-  'from create order',
+  'from create stripe order',
+  400
+);
+
+exports.createCashOrder = catchAsync(
+  async (req, res) => {
+    const { COD, couponApplied } = req.body;
+
+    if (!COD) {
+      return res.status(400).send('Create Cash Order Failed');
+    }
+
+    //if COD is true, create order with status Cash On Delivery
+
+    const user = await User.findOne({ email: req.user.email });
+
+    let userCart = await Cart.findOne({ orderedBy: user._id });
+
+    let paymentIntent = {
+      id: uniqueid(),
+      amount: userCart.cartTotal * 100,
+      currency: 'usd',
+      status: 'Cash On Delivery',
+      created: Date.now(),
+      payment_method_types: ['cash'],
+    };
+
+    if (couponApplied) {
+      let finalAmount = userCart.totalAfterDiscount * 100;
+      paymentIntent.amount = finalAmount;
+    }
+
+    await new Order({
+      products: userCart.products,
+      paymentIntent,
+      orderedBy: user._id,
+      orderStatus: 'Cash On Delivery',
+    }).save();
+
+    //update Product collection - increment sold
+    let bulkOption = userCart.products.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.product._id },
+          update: { $inc: { quantity: -item.count, sold: +item.count } },
+        },
+      };
+    });
+
+    await Product.bulkWrite(bulkOption, {});
+
+    res.json({ ok: true });
+  },
+  'from create cash order',
   400
 );
 
 exports.getOrders = catchAsync(
   async (req, res) => {
     let user = await User.findOne({ email: req.user.email });
-    let userOrders = await Order.find({ orderedBy: user._id }).populate(
-      'products.product'
-    );
+    let userOrders = await Order.find({ orderedBy: user._id })
+      .sort({ createdAt: -1 })
+      .populate('products.product');
 
     res.json({ userOrders });
   },
   'from get orders',
+  400
+);
+
+exports.wishList = catchAsync(
+  async (req, res) => {
+    const list = await User.findOne({ email: req.user.email })
+      .select('wishlist')
+      .populate('wishlist');
+    res.json(list);
+  },
+  'from get wishlist',
+  400
+);
+
+exports.addToWishlist = catchAsync(
+  async (req, res) => {
+    const { productId } = req.body;
+
+    await User.findOneAndUpdate(
+      { email: req.user.email },
+      { $addToSet: { wishlist: productId } },
+      { new: true }
+    );
+
+    res.json({ ok: true });
+  },
+  'from get wishlist',
+  400
+);
+exports.removeFromWislist = catchAsync(
+  async (req, res) => {
+    const { productId } = req.params;
+
+    await User.findOneAndUpdate(
+      { email: req.user.email },
+      { $pull: { wishlist: productId } }
+    );
+    res.json({ ok: true });
+  },
+  'from get wishlist',
   400
 );

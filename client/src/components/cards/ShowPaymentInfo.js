@@ -1,13 +1,13 @@
 import React from 'react';
 
-const ShowPaymentInfo = ({ order }) => (
+const ShowPaymentInfo = ({ order, showStatus = true }) => (
   <div className=''>
     <p>
       <span>Order Id: {order.paymentIntent.id}</span>
       {' / '}
       <span>
         Amount:{' '}
-        {(order.paymentIntent.amount /= 100).toLocaleString('en-US', {
+        {(order.paymentIntent.amount / 100).toLocaleString('en-US', {
           style: 'currency',
           currency: 'USD',
         })}
@@ -23,8 +23,12 @@ const ShowPaymentInfo = ({ order }) => (
         {new Date(order.paymentIntent.created * 1000).toLocaleString()}
       </span>
       {' / '}
-      <span className='bg-primary text-white'>STATUS: {order.orderStatus}</span>
-      {' / '}
+      <br />
+      {showStatus && (
+        <span className='bg-primary text-white'>
+          STATUS: {order.orderStatus}
+        </span>
+      )}
     </p>
   </div>
 );

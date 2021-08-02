@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { Fragment } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { CASH_ON_DELIVERY } from '../actions/types';
 
 import ProductCardInCheckout from '../components/cards/ProductCardInCheckout';
 import { userCart } from '../functions/user';
@@ -50,6 +52,17 @@ const Cart = ({ history }) => {
     }
   };
 
+  const saveCashOrderToDb = async (cart, authToken) => {
+    try {
+      //save order in database
+      dispatch({ type: CASH_ON_DELIVERY, payload: true });
+      const res = await userCart(cart, authToken);
+      if (res.data.ok) history.push('/checkout');
+    } catch (error) {
+      console.log('From saveCashOrderToDb', error);
+    }
+  };
+
   return (
     <div className='container-fluid pt-2'>
       <div className='row'>
@@ -82,13 +95,22 @@ const Cart = ({ history }) => {
           </div>
           <hr />
           {user ? (
-            <button
-              onClick={() => saveOrderToDb(cart, user.token)}
-              className='btn btn-sm btn-primary mt-2'
-              disabled={!cart.length}
-            >
-              Proceed to Checkout
-            </button>
+            <Fragment>
+              <button
+                onClick={() => saveOrderToDb(cart, user.token)}
+                className='btn btn-sm btn-primary mt-2'
+                disabled={!cart.length}
+              >
+                Proceed to Checkout
+              </button>
+              <button
+                onClick={() => saveCashOrderToDb(cart, user.token)}
+                className='btn btn-sm btn-danger mt-2'
+                disabled={!cart.length}
+              >
+                Pay Cash on Delivery
+              </button>
+            </Fragment>
           ) : (
             <button className='btn btn-sm btn-primary mt-2'>
               <Link

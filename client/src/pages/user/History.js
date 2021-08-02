@@ -68,7 +68,9 @@ const History = () => {
       <tbody>
         {order.products.map((item, index) => (
           <tr key={index}>
-            <td>{item.product.title}</td>
+            <td>
+              <b>{item.product.title}</b>
+            </td>
             <td>{item.product.price}</td>
             <td>{item.product.brand}</td>
             <td>{item.color}</td>

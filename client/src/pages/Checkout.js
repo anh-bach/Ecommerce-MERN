@@ -9,8 +9,13 @@ import {
   emptyUserCart,
   saveUserAddress,
   applyCoupon,
+  createCashOrderForUser,
 } from '../functions/user';
-import { ADD_TO_CART, COUPON_APPLIED } from '../actions/types';
+import {
+  ADD_TO_CART,
+  CASH_ON_DELIVERY,
+  COUPON_APPLIED,
+} from '../actions/types';
 
 const Checkout = ({ history }) => {
   const [loading, setLoading] = useState(false);
@@ -21,7 +26,7 @@ const Checkout = ({ history }) => {
   const [coupon, setCoupon] = useState('');
   const [totalAfterDiscount, setTotalAfterDiscount] = useState(0);
   const [discountError, setDiscountError] = useState('');
-  const user = useSelector((state) => state.user);
+  const { user, COD } = useSelector((state) => state);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -138,6 +143,25 @@ const Checkout = ({ history }) => {
     </Fragment>
   );
 
+  const createCashOrder = async () => {
+    try {
+      const res = await createCashOrderForUser(user.token, COD, coupon);
+      //empty cart redux, loclaStorage
+      if (res.data.ok) {
+        localStorage.removeItem('cart');
+        dispatch({ type: ADD_TO_CART, payload: [] });
+        dispatch({ type: COUPON_APPLIED, payload: false });
+        dispatch({ type: CASH_ON_DELIVERY, payload: false });
+        //empty cart from backend
+        await emptyUserCart(user.token);
+        //redirect
+        history.push('/user/history');
+      }
+    } catch (error) {
+      console.log('From cash order', error);
+    }
+  };
+
   return (
     <div className='row mt-2 px-2'>
       <div className='col-md-6'>
@@ -172,13 +196,23 @@ const Checkout = ({ history }) => {
 
         <div className='row'>
           <div className='col-md-6'>
-            <button
-              className='btn btn-primary'
-              disabled={!addressSaved || !products.length}
-              onClick={() => history.push('/payment')}
-            >
-              Place Order
-            </button>
+            {COD ? (
+              <button
+                className='btn btn-primary'
+                disabled={!addressSaved || !products.length}
+                onClick={createCashOrder}
+              >
+                Place Order
+              </button>
+            ) : (
+              <button
+                className='btn btn-primary'
+                disabled={!addressSaved || !products.length}
+                onClick={() => history.push('/payment')}
+              >
+                Place Order
+              </button>
+            )}
           </div>
           <div className='col-md-6'>
             <button

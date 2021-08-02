@@ -1,7 +1,6 @@
 const User = require('../models/user');
-const Product = require('../models/product');
 const Cart = require('../models/cart');
-const Coupon = require('../models/coupon');
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const catchAsync = require('../utils/catchAsync');
 
