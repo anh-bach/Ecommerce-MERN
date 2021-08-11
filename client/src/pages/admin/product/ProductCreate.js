@@ -10,19 +10,19 @@ import ProductCreateForm from '../../../components/forms/ProductCreateForm';
 import FileUpload from '../../../components/forms/FileUpload';
 
 const initialState = {
-  title: 'MacBook Pro',
-  description: 'This is the best Apple product',
-  price: '4500',
+  title: '',
+  description: '',
+  price: '',
   category: '',
   categories: [],
   subs: [],
-  shipping: 'Yes',
-  quantity: '50',
+  shipping: '',
+  quantity: '',
   images: [],
   colors: ['Black', 'Brown', 'Silver', 'White', 'Blue'],
   brands: ['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'],
-  color: 'White',
-  brand: 'Apple',
+  color: '',
+  brand: '',
 };
 
 const ProductCreate = () => {
