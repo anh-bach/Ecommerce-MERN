@@ -1,0 +1,11 @@
+{
+  "name": "ecommerce-site-iamanh",
+  "engines": {
+    "node": "v14.16.1",
+    "npm": "6.14.12"
+  },
+  "version": "1.0.0",
+  "scripts": {
+    "heoku-postbuild": "NPM_CONFIG_PRODUCTION=false npm run ./server/heroku-postbuild"
+  }
+}
