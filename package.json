@@ -6,7 +6,7 @@
   },
   "version": "1.0.0",
   "scripts": {
-    "start": "npm run ./server/start",
+    "start": "node server/server.js",
     "heoku-postbuild": "NPM_CONFIG_PRODUCTION=false npm run ./server/heroku-postbuild"
   }
 }
