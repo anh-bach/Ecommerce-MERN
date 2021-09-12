@@ -6,7 +6,6 @@
   },
   "version": "1.0.0",
   "scripts": {
-    "start": "npm install --prefix server && npm start --prefix server",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix server && npm start --prefix server && npm install --prefix client && npm run build --prefix client"
   }
 }
